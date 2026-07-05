@@ -1,0 +1,15 @@
+import { createBackendHook } from '../../lib/backend/hookFactory'
+
+export const useAcceptInvitation = createBackendHook<{ token: string; password: string }, unknown>('admin.acceptInvitation')
+export const useAssignQuestionSet = createBackendHook<{ client_id: number; question_set_id: number; due_date?: string; notes?: string }, unknown>('admin.assignQuestionSet')
+export const useDeleteProfileFieldDef = createBackendHook<{ id: number }, unknown>('admin.deleteProfileFieldDef')
+export const useGetClientDetail = createBackendHook<{ client_id: number }, unknown>('admin.getClientDetail')
+export const useGetClients = createBackendHook<Record<string, never>, unknown>('admin.getClients')
+export const useGetInvitationByToken = createBackendHook<{ token: string }, unknown>('admin.getInvitationByToken')
+export const useGetInvitations = createBackendHook<Record<string, never>, unknown>('admin.getInvitations')
+export const useGetProfileFieldDefs = createBackendHook<Record<string, never>, unknown>('admin.getProfileFieldDefs')
+export const useInviteClient = createBackendHook<{ email: string; full_name: string; app_url: string; message?: string }, unknown>('admin.inviteClient')
+export const useRemoveAssignment = createBackendHook<{ assignment_id: number }, unknown>('admin.removeAssignment')
+export const useResendInvitation = createBackendHook<{ id: number; app_url: string }, unknown>('admin.resendInvitation')
+export const useRevokeInvitation = createBackendHook<{ id: number }, unknown>('admin.revokeInvitation')
+export const useSaveProfileFieldDef = createBackendHook<Record<string, unknown>, unknown>('admin.saveProfileFieldDef')

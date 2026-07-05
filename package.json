@@ -1,0 +1,253 @@
+{
+  "private": true,
+  "retool": {
+    "app": {
+      "uuid": "9b9579d0-7751-11f1-8a90-e7fb9d147d91",
+      "name": null,
+      "resourceReferencesByFile": {
+        "/backend/declarations/getDeclarationById.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/declarations/getDeclarations.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/declarations/submitDeclaration.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/declarations/submitFeedback.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/user.d.ts": [],
+        "/backend/clients/loginClient.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/clients/registerClient.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/declarations/submitDeclarationWithAnswers.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/declarations/uploadDeclarationFile.ts": [
+          {
+            "name": "retool_storage",
+            "displayName": "retool_storage",
+            "type": "retoolStorage"
+          }
+        ],
+        "/backend/questions/deleteQuestion.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/questions/deleteQuestionSet.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/questions/getQuestionSet.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/questions/getQuestionSets.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/questions/getQuestionsForType.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/questions/reorderQuestions.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/questions/saveQuestion.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/questions/saveQuestionSet.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/acceptInvitation.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/getClients.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/getInvitationByToken.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/getInvitations.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/inviteClient.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          },
+          {
+            "name": "retool_email",
+            "displayName": "retool_email",
+            "type": "retoolEmail"
+          }
+        ],
+        "/backend/admin/resendInvitation.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          },
+          {
+            "name": "retool_email",
+            "displayName": "retool_email",
+            "type": "retoolEmail"
+          }
+        ],
+        "/backend/admin/revokeInvitation.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/assignQuestionSet.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/deleteProfileFieldDef.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/getClientDetail.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/getProfileFieldDefs.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/removeAssignment.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/admin/saveProfileFieldDef.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/client/getMyAssignments.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/client/getOnboardingFields.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/client/saveClientProfile.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ],
+        "/backend/client/submitAssignment.ts": [
+          {
+            "name": "3bba2350-fa00-4216-a1ee-b8decf872959",
+            "displayName": "retool_db",
+            "type": "retoolDb"
+          }
+        ]
+      }
+    }
+  }
+}
