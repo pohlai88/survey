@@ -2,28 +2,32 @@
 
 ## Context
 
-This document defines the correct target architecture for the Client Declaration Portal as a production-grade full-stack system. It is intended for engineers, architects, and technical stakeholders who need a shared system model before implementation hardens around platform-specific constraints.
+This document defines the correct target architecture for the Client Declaration Portal as a production-grade full-stack system. It is written for engineers, architects, and technical stakeholders who need a normative system model before implementation and hosting details harden around incomplete runtime choices.
 
 The portal supports two primary personas:
 
 - Client users who accept invitations, activate accounts, complete onboarding, submit declarations, upload supporting evidence, and respond to assigned questionnaires.
 - Administrative users who manage clients, configure onboarding fields and question sets, assign work, review submissions, issue feedback, and make status decisions.
 
-This architecture is normative. It does not treat the current Retool-hosted implementation as the desired end state. The current implementation is used only as source evidence for workflows and as input to the appendix gap analysis.
+This document is normative. It does not treat the current Retool-hosted codebase or the current Vercel deployment as the desired end state. Both are used only as evidence:
 
-The document enables these decisions:
+- The repository is used to confirm actual workflows that must exist in the final system.
+- The current Vercel deployment is used to confirm what is presently deployable versus what is still missing for true end-to-end operation.
 
-- What subsystems the portal must contain to be considered end-to-end.
+This document enables these decisions:
+
+- What subsystems the portal must contain to be considered full-stack and end-to-end.
 - Where responsibilities and trust boundaries belong.
 - Which domain entities and interfaces must exist.
-- Which operational and security controls are mandatory for production readiness.
+- Which deployment gaps are structural versus surgical.
 
 Assumptions:
 
-- The portal is an internal business system with sensitive client identity and declaration data.
+- The portal handles sensitive client identity and declaration data.
 - The system of record is relational.
 - The solution must support both ad hoc client declarations and admin-assigned questionnaires.
-- This document defines target-state architecture, not migration sequencing.
+- The target frontend may be hosted on Vercel, but the architecture must not depend on Vercel-specific limitations.
+- This document defines target-state architecture, not a phased migration plan.
 
 ## Responsibilities and Boundaries
 
@@ -34,92 +38,92 @@ Assumptions:
 - Collect and store structured answers and supporting files.
 - Enable administrative review, verification feedback, and status outcomes.
 - Provide an auditable record of user actions, workflow transitions, and review decisions.
-- Send operational notifications related to invitations, assignments, and review events.
+- Send notifications related to invitations, assignments, submissions, and review events.
 
 ### Explicit Boundaries
 
 - The portal owns client access to declaration workflows, but not enterprise workforce identity management for internal staff.
-- The portal owns declaration-related evidence metadata and access control, but not the low-level object storage infrastructure.
-- The portal owns notification triggering and message composition policy, but may delegate transport to external email or messaging providers.
-- The portal owns business workflow state, but not generic observability tooling internals.
+- The portal owns declaration-related evidence metadata and access control, but not the low-level object storage platform itself.
+- The portal owns notification triggering, templates, and delivery state, but may delegate transport to external providers.
+- The portal owns business workflow state, but not generic observability vendor internals.
 
 ### Out of Scope
 
-- Public API portal or third-party developer documentation.
-- Customer-facing marketing or help-center content.
-- Detailed migration plan from the current Retool implementation.
-- Fine-grained infrastructure vendor selection unless it affects architecture boundaries.
+- Public developer portal or published API reference.
+- End-user help-center content.
+- Detailed migration sequencing from Retool to the target system.
+- Vendor lock-in decisions beyond interfaces and trust boundaries.
 
 ## Target Components
 
-The target system is composed of eight major layers.
+The target system consists of eight named layers.
 
 ### 1. Web Frontend
 
-- Separate admin and client experiences served from a common web application or closely related frontends.
-- Browser-based UI for invitations, account activation, onboarding, dashboarding, declaration creation, questionnaire completion, review, and administration.
-- Stateless presentation layer that never acts as the system of record for identity, authorization, or workflow state.
-- Uses backend-issued sessions or tokens and consumes backend APIs only through approved application domains.
+- Separate admin and client experiences served from one web application or closely related frontend surfaces.
+- Browser UI for invitation acceptance, account activation, onboarding, dashboarding, declaration creation, questionnaire completion, review, and administration.
+- Stateless presentation layer that is never the source of truth for identity, authorization, workflow state, or evidence access.
+- Consumes backend APIs through explicit domain contracts only.
 
 ### 2. Backend Application / API Layer
 
-- Single business API surface that exposes domain-oriented endpoints for authentication-adjacent flows, client profile operations, declarations, question sets, assignments, reviews, and file metadata.
+- Single business API surface exposing domain-oriented endpoints for auth-adjacent flows, client profile operations, declarations, question sets, assignments, reviews, and file metadata.
 - Enforces validation, authorization, workflow invariants, and cross-entity consistency.
 - Owns transaction boundaries for submission, assignment, review, and status updates.
-- Normalizes errors into stable domain outcomes that the frontend can handle safely.
+- Returns stable domain outcomes and error contracts to the frontend.
 
 ### 3. Identity and Session Management
 
 - Dedicated identity subsystem for client authentication, account activation, password reset, session issuance, session revocation, and optional MFA.
 - Internal staff authentication delegated to the organization identity provider, with role mapping into portal authorization.
-- Session lifecycle separated from frontend local state to prevent the browser from becoming the source of truth.
-- Invitation acceptance produces a durable identity account only after token validation and password policy checks.
+- Session lifecycle separated from frontend local state.
+- Invitation acceptance creates a durable identity account only after token validation and policy checks.
 
 ### 4. Workflow / Orchestration Layer
 
-- Coordinates long-lived business flows: invitation lifecycle, onboarding completion, assignment issuance, client submission, review, and notifications.
-- Emits domain events for downstream processing, audit capture, notifications, and operational reporting.
-- Supports asynchronous work where appropriate, especially for email delivery, file post-processing, and audit fan-out.
-- Maintains explicit workflow states instead of relying on inferred state from UI navigation.
+- Coordinates invitation lifecycle, onboarding completion, assignment issuance, declaration submission, review, and notifications.
+- Emits domain events for downstream processing, audit capture, notifications, and reporting.
+- Supports asynchronous handling for email delivery, file post-processing, and audit fan-out.
+- Maintains explicit workflow states rather than inferring state from UI navigation.
 
 ### 5. Relational System of Record
 
 - Stores durable business entities, workflow states, review history, and references to uploaded evidence.
-- Supports transactional integrity for operations that span declarations, answers, assignments, and feedback.
-- Uses normalized tables for core entities and controlled JSON fields only where configurability is required.
-- Persists timestamps, actors, and status transition history needed for traceability.
+- Supports transactional integrity for operations spanning declarations, answers, assignments, and feedback.
+- Uses normalized tables for core entities and constrained JSON fields only where configurability is required.
+- Persists timestamps, actors, and transition history required for traceability.
 
 ### 6. Document / File Storage Subsystem
 
-- Stores uploaded evidence in durable object storage using opaque storage keys rather than client-visible physical paths.
-- Uses short-lived signed upload and download mechanisms.
-- Maintains metadata in the relational store, including ownership, MIME type, size, checksum, retention class, and association to the declaration or answer.
+- Stores uploaded evidence in durable object storage using opaque storage keys rather than client-visible paths.
+- Uses short-lived signed upload and download flows.
+- Maintains metadata in the relational store, including ownership, MIME type, size, checksum, retention class, and business linkage.
 - Separates storage access from direct frontend trust.
 
 ### 7. Notification Service
 
 - Sends invitation emails, assignment notifications, onboarding reminders, submission confirmations, and review outcome notices.
-- Triggered by workflow events, not by direct UI-only logic.
+- Triggered by workflow events, not direct UI-only logic.
 - Supports templating, delivery tracking, retry, and failure reporting.
-- Maintains message audit records linked to the originating business event.
+- Maintains message audit records linked to originating business events.
 
 ### 8. Audit and Observability Layer
 
-- Captures immutable audit events for authentication events, invitation usage, profile completion, assignments, submissions, feedback, status changes, and administrative configuration changes.
+- Captures immutable audit events for authentication, invitation usage, profile completion, assignments, submissions, feedback, status changes, and configuration changes.
 - Emits structured logs, metrics, and traces for operational visibility.
 - Supports alerting for failed notifications, abnormal auth patterns, storage errors, and workflow dead ends.
-- Provides enough observability to reconstruct who did what, when, and from which subsystem.
+- Provides enough evidence to reconstruct who did what, when, and from which subsystem.
 
 ## Data and Request Flows
 
 ### Flow 1: Invite -> Accept Invite -> Activate Account -> Onboarding
 
-1. An admin creates an invitation for a client with identity seed data such as name and email.
+1. An admin creates an invitation for a client with seed identity data such as name and email.
 2. The backend validates that the invitation is allowed and creates an invitation record with status, expiry, actor, and token reference.
 3. The workflow layer triggers the notification service to send an invitation message containing a one-time activation link.
 4. The client opens the link, and the frontend requests invitation validation from the backend.
 5. The identity subsystem validates token status, expiry, revocation state, and reuse rules.
-6. The client sets a password or completes the configured activation flow.
+6. The client completes activation by setting credentials or completing the configured identity flow.
 7. The identity subsystem creates the client account and issues a server-managed session.
 8. The frontend redirects the client into onboarding.
 9. The client completes required profile fields defined by administrative configuration.
@@ -139,8 +143,8 @@ The target system is composed of eight major layers.
 ### Flow 3: Client Self-Service Declaration Submission with Dynamic Questions and Evidence
 
 1. An authenticated client starts a new declaration.
-2. The frontend requests the declaration type catalog and any active question configuration for the selected type.
-3. The client enters declaration details and uploads any required evidence.
+2. The frontend requests the declaration type catalog and active question configuration for the selected type.
+3. The client enters declaration details and uploads required evidence.
 4. The backend validates declaration content, answer completeness, file associations, and business rules.
 5. The backend creates the declaration, persists structured answers, stores evidence references, and sets an initial review status.
 6. The workflow layer publishes the submission event and triggers downstream notifications as configured.
@@ -148,10 +152,10 @@ The target system is composed of eight major layers.
 ### Flow 4: Admin Review -> Feedback -> Status Decision
 
 1. An admin retrieves pending or filtered declarations through review APIs.
-2. The backend returns declaration details, structured answers, evidence references, prior feedback, and audit-visible timeline data.
+2. The backend returns declaration details, structured answers, evidence references, prior feedback, and an auditable timeline.
 3. The admin reviews the submission and records verification feedback.
 4. The backend persists feedback as a first-class review artifact rather than a transient comment.
-5. If the admin changes declaration status, the backend enforces allowed state transitions and writes the transition history.
+5. If the admin changes declaration status, the backend enforces allowed state transitions and writes transition history.
 6. The workflow layer emits review outcome events and triggers client notification when required.
 
 ### Flow 5: Admin Configuration of Profile Fields and Question Sets
@@ -168,7 +172,7 @@ The target system is composed of eight major layers.
 
 - Client authentication is handled by a dedicated identity subsystem with hashed passwords, secure credential recovery, and server-controlled sessions.
 - Admin authentication is delegated to enterprise identity and mapped to portal roles.
-- Invitation tokens are one-time, time-bounded, revocable, and stored in a non-reversible or otherwise protected form.
+- Invitation tokens are one-time, time-bounded, revocable, and stored in protected form.
 
 ### Authorization
 
@@ -186,6 +190,7 @@ The target system is composed of eight major layers.
 ### Data Protection
 
 - Sensitive data is encrypted in transit and protected at rest.
+- API responses that may contain identity, workflow, declaration, or readiness data use no-store cache headers and JSON content-sniffing protection.
 - Uploaded evidence is never exposed through permanent public URLs.
 - File access is granted via short-lived signed retrieval or streamed proxy access.
 - Audit trails preserve actor identity and business context for compliance review.
@@ -417,236 +422,108 @@ Expected handling:
 
 ## Known Limits / Future Changes
 
-- This document does not choose a specific identity provider, object storage vendor, relational engine, or workflow engine.
+- This document does not choose a specific identity provider, object storage vendor, relational engine, workflow engine, or notification vendor.
 - A later implementation document should define versioning policy for question sets and profile field definitions.
 - A later migration document should define how to transition from platform-coupled logic to the target architecture without interrupting active clients.
-- Additional future concerns may include MFA, richer evidence scanning, reviewer queues, SLA tracking, and client notification preferences.
-
-## Appendix A: Gap Analysis from Current Retool-Hosted Implementation
-
-This appendix compares the current implementation shape in the repository with the target architecture above. It is descriptive of current state and should not be read as design guidance.
-
-### Subsystem: Frontend and Delivery
-
-#### Current Retool-Hosted Implementation
-
-- React pages are embedded in a Retool application structure.
-- Admin and client surfaces coexist inside the same routed frontend.
-- The frontend directly depends on generated or platform-coupled hooks for backend actions.
-
-#### Correct Target-State Architecture
-
-- A standalone production web frontend consumes stable backend APIs.
-- Frontend concerns are separated from backend execution and platform hosting assumptions.
-- Authentication state is derived from backend-managed session truth.
-
-#### Missing Capabilities Required for Full End-to-End Operation
-
-- Independent deployment boundary for the web frontend.
-- Stable BFF or API consumption model decoupled from Retool query mechanics.
-- Proper session bootstrap and authenticated app initialization patterns.
-
-#### Priority / Impact
-
-- Priority: High
-- Impact: The current delivery model makes platform coupling a core runtime dependency and prevents the frontend boundary from behaving like a standard production portal.
-
-### Subsystem: Identity and Session Management
-
-#### Current Retool-Hosted Implementation
-
-- Client login checks plaintext password equality in application logic.
-- Client auth state is persisted in browser local storage.
-- Invitation acceptance creates accounts directly in the business data store.
-
-#### Correct Target-State Architecture
-
-- Passwords are hashed and managed by a dedicated identity subsystem.
-- Sessions are server-managed and revocable.
-- Invitation activation is integrated with identity lifecycle controls.
-
-#### Missing Capabilities Required for Full End-to-End Operation
-
-- Secure password hashing and reset flows.
-- HTTP-only session or equivalent token management.
-- Auth rate limiting, revocation, lockout, and security monitoring.
-- Separation between identity data and general business workflow handlers.
-
-#### Priority / Impact
-
-- Priority: Critical
-- Impact: The current model is not production-safe for authentication or session trust.
-
-### Subsystem: Backend Application Layer
-
-#### Current Retool-Hosted Implementation
-
-- Backend logic exists as discrete Retool query functions tied closely to specific UI actions.
-- Business operations are fragmented by page-level use rather than domain-level APIs.
-
-#### Correct Target-State Architecture
-
-- The backend exposes coherent application services and API domains.
-- Validation, authorization, transactions, and workflow rules are centralized.
-
-#### Missing Capabilities Required for Full End-to-End Operation
-
-- Proper service boundary and API contract design.
-- Centralized authorization enforcement.
-- Shared validation and error normalization strategy.
-
-#### Priority / Impact
-
-- Priority: High
-- Impact: Fragmented handlers increase inconsistency risk and make cross-cutting concerns hard to enforce.
-
-### Subsystem: Workflow and Orchestration
-
-#### Current Retool-Hosted Implementation
-
-- Invitation, onboarding, assignment, submission, and feedback flows are executed inline in request handlers.
-- Notifications are triggered directly from invitation handlers.
-- There is no explicit domain event or workflow orchestration layer.
-
-#### Correct Target-State Architecture
-
-- Long-lived business flows are modeled explicitly and emit events for downstream work.
-- Notifications, audit fan-out, and asynchronous remediation are handled outside synchronous UI requests where appropriate.
-
-#### Missing Capabilities Required for Full End-to-End Operation
-
-- Domain event model.
-- Job or workflow processing for asynchronous tasks.
-- Retryable notification and post-submission processing.
-
-#### Priority / Impact
-
-- Priority: High
-- Impact: Inline workflow execution limits resilience, recovery, and observability.
-
-### Subsystem: Relational Data Model
-
-#### Current Retool-Hosted Implementation
-
-- The current schema shape covers core business tables such as clients, invitations, declarations, answers, feedback, question sets, questions, assignments, and profile field definitions.
-- Some business state appears to be stored in flexible fields such as profile JSON.
-- Status handling is present but transition governance is minimal.
-
-#### Correct Target-State Architecture
-
-- The relational model remains the system of record, but with stricter lifecycle rules, identity separation, and durable status histories.
-
-#### Missing Capabilities Required for Full End-to-End Operation
-
-- Transition history for workflow-critical status changes.
-- Stronger schema support for audit and identity boundaries.
-- Versioning or lifecycle controls for administrative configuration.
-
-#### Priority / Impact
-
-- Priority: Medium
-- Impact: The basic model exists, but governance and traceability are incomplete.
-
-### Subsystem: File Storage
-
-#### Current Retool-Hosted Implementation
-
-- File uploads use Retool storage and store file identifiers with declaration answers.
-- The frontend converts files to base64 and submits them through application handlers.
-
-#### Correct Target-State Architecture
-
-- Files are uploaded through authorized storage flows with metadata finalization and controlled retrieval.
-- Storage access is detached from UI-only conventions and supports secure evidence handling.
-
-#### Missing Capabilities Required for Full End-to-End Operation
-
-- Signed upload/download workflow.
-- Checksum, size, retention, and ownership metadata model.
-- Stronger evidence access control and download auditing.
-
-#### Priority / Impact
-
-- Priority: High
-- Impact: Evidence handling is central to the portal and needs stronger contracts and controls.
-
-### Subsystem: Notifications
-
-#### Current Retool-Hosted Implementation
-
-- Invitation and resend emails are sent directly from request handlers through Retool email.
-- Other business notifications are not clearly modeled as system capabilities.
-
-#### Correct Target-State Architecture
-
-- Notifications are an event-driven subsystem with templates, retries, delivery status, and audit linkage.
-
-#### Missing Capabilities Required for Full End-to-End Operation
-
-- Notification abstraction beyond invitation emails.
-- Delivery tracking and retry behavior.
-- Review outcome and assignment notifications.
-
-#### Priority / Impact
-
-- Priority: Medium
-- Impact: Core communication workflows are incomplete and operationally brittle.
-
-### Subsystem: Audit and Observability
-
-#### Current Retool-Hosted Implementation
-
-- The repository shows business timestamps and reviewer records but no dedicated audit-event model.
-- There is no visible structured observability or operational monitoring boundary.
-
-#### Correct Target-State Architecture
-
-- Audit is a first-class subsystem with immutable events.
-- Logs, metrics, and traces support operations and compliance review.
-
-#### Missing Capabilities Required for Full End-to-End Operation
-
-- Explicit audit-event persistence.
-- Structured logging and metrics.
-- Alerting around auth, workflow, notification, and storage failures.
-
-#### Priority / Impact
-
-- Priority: Critical
-- Impact: Without audit and observability, the system is not sufficiently supportable or compliant.
-
-### Subsystem: Authorization and Administrative Safety
-
-#### Current Retool-Hosted Implementation
-
-- Admin actions are available in frontend routes and backend handlers, but the repository does not show a full server-side authorization model.
-- Reviewer identity is partly user-supplied in feedback submission flows.
-
-#### Correct Target-State Architecture
-
-- Administrative access is enforced by backend role and actor identity.
-- Sensitive actions use authenticated actor attribution rather than user-entered identity fields.
-
-#### Missing Capabilities Required for Full End-to-End Operation
-
-- Server-side role-based access control.
-- Reviewer identity binding to authenticated staff accounts.
-- Privileged action audit and approval controls where required.
-
-#### Priority / Impact
-
-- Priority: Critical
-- Impact: Administrative integrity and non-repudiation are not strong enough in the current model.
-
-## Appendix B: Evidence Used from the Repository
-
-The target architecture and gap analysis were derived from the currently implemented application surfaces in the repository, including:
+- Additional future concerns may include MFA, evidence scanning, reviewer queues, SLA tracking, and client notification preferences.
+
+## Appendix A: Vercel Deployment Evidence
+
+This appendix records observed deployment facts from the current Vercel-hosted frontend as of 2026-07-05. It is descriptive evidence only.
+
+### Observed Deployment State
+
+- Vercel project: `survey`
+- Vercel framework detection: `vite`
+- Team: `Jack's projects`
+- Project ID: `prj_3qkhhTdjzm0ov2yZCDH0B7EONhiA`
+- Deployment ID: `dpl_738Yj1Vcb1Z3ffB1nyDRLj3PWjKm`
+- Production alias observed: `survey-one-gules.vercel.app`
+- Root document returned `200`, confirming the static frontend deploys successfully.
+
+### Observed Runtime Boundary
+
+- The deployed artifact is the frontend application rooted in `frontend/`.
+- Vercel auto-linked `frontend/.vercel/project.json`, which confirms the deployment boundary is the frontend directory rather than the repository root.
+- The deployed application builds and serves the Vite bundle successfully.
+- The deployed application now exposes a same-origin `/api/<domain>/<operation>` boundary that returns stable JSON envelopes.
+
+### Observed Backend Gap in Production
+
+- The frontend runtime attempts to call either:
+  - a configured `VITE_PORTAL_API_BASE_URL`, or
+  - same-origin `POST /api/...` endpoints when no external API base URL is configured.
+- Retool and injected backend browser bridges are allowed in development by default, but production bridge use requires explicit `VITE_ENABLE_*_BRIDGE` flags.
+- Direct production verification of `POST /api/client/getMyAssignments` with no session returned JSON `401 UNAUTHORIZED`.
+- Local boundary verification confirms client sessions can be accepted from a same-site `portal_client_session` cookie or bearer token, with legacy body `__session` retained only for compatibility paths.
+- Frontend HTTP API calls now send browser-held client session tokens as `Authorization: Bearer ...` instead of injecting them into JSON request bodies.
+- Direct production verification of `POST /api/admin/inviteClient` without configured admin auth returned JSON `503 ADMIN_AUTH_UNCONFIGURED`.
+- Direct production verification of an unknown operation returned JSON `404 OPERATION_NOT_FOUND`.
+- Direct production verification of `GET /api/health/readiness` returned JSON `405 METHOD_NOT_ALLOWED`.
+- Direct production verification confirmed API responses include `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, and `X-Request-Id`.
+- Direct handler verification of admin requests with missing, invalid, and valid admin tokens returned `401 UNAUTHORIZED`, `403 FORBIDDEN`, and `503 BACKEND_RESOURCE_UNAVAILABLE` respectively.
+- The API boundary now classifies operation dependencies as `database`, `storage`, or `notification` and reports missing resource classes in the error details.
+- When required resource configuration is present but no adapter implementation exists, the API boundary returns `501 BACKEND_ADAPTER_NOT_IMPLEMENTED`.
+- Direct production verification of `POST /api/health/readiness` returned `200` with `status: degraded` and missing `database`, `notification`, and `storage` resources.
+- The readiness response reports non-secret API-boundary, admin-auth, resource-configuration, and adapter-implementation readiness; it is diagnostic only and does not prove business flows are executable.
+- This confirms the Vercel deployment now has an API boundary, but not the resource adapters required for full backend execution.
+
+### Operational Meaning of the Deployment Evidence
+
+- Frontend delivery on Vercel is viable.
+- Same-origin API routing on Vercel is viable.
+- The present Vercel deployment is not proof of end-to-end readiness because backend resources are not configured behind the API boundary.
+- The missing work is now primarily resource-backed backend execution, identity, file, workflow, and operational layers, not static asset hosting or API route existence.
+
+## Appendix B: Surgical Gap Analysis to Reach Full End-to-End Operation
+
+This appendix separates the specific missing pieces from the target architecture. It is intentionally surgical: each row describes the smallest missing production capability that blocks true end-to-end behavior.
+
+| Subsystem | Current deployed / implemented reality | Correct target-state capability | Surgical change needed | Priority | Impact if missing |
+|---|---|---|---|---|---|
+| Frontend delivery | Vercel successfully serves the Vite frontend from `frontend/`. | Standalone web frontend is valid and production-hosted. | Keep the current frontend deployment boundary. No architectural rewrite needed here. | Low | Hosting alone is not the blocker. |
+| Frontend-to-backend runtime | Same-origin `/api/<domain>/<operation>` now returns JSON envelopes in production; readiness is exposed at `/api/health/readiness`; Retool/browser bridges are explicitly gated outside development; backend calls distinguish missing configuration from missing adapter implementation. | Frontend can call a real backend consistently in all environments. | Wire the active API boundary to real backend resource adapters instead of the current resource-unavailable placeholder. | High | The deployed app has API routing, but business operations still cannot execute end to end. |
+| Backend application layer | Domain logic exists in repo, and production API routing exists, but no production database/storage/email adapters are configured behind it. | Stable application/API layer exposing domain contracts. | Replace Retool-coupled resource assumptions with deployable backend adapters and connect them to the API boundary. | Critical | UI and API route are present, but business operations remain unavailable in production. |
+| Identity and session management | Frontend still owns the opaque session token, but HTTP calls now avoid JSON body token injection and the API boundary accepts bearer or same-site cookie session transport before passing sanitized actor context to dispatch. There is still no server session store or revocation path. | Server-managed identity and session subsystem. | Replace browser-trusted session model with server-issued HTTP-only session cookies or equivalent server-trusted session mechanism. Add real session introspection, logout, reset, and revocation endpoints. | Critical | Authentication is improved at the boundary but is still not production-complete or fully trustworthy across requests. |
+| Client activation and invitation flow | Invite and accept logic exists in code, but production runtime has no reachable activation backend. | Invitation lifecycle integrated with identity and notification systems. | Deploy invitation validation, activation, token expiry, revocation, and resend flows behind the production API boundary. | High | Client entry into the system is incomplete and operationally fragile. |
+| Admin authorization | Admin routes and handlers exist; the deployed API boundary can fail closed for admin operations, but final server-enforced RBAC is not established. | Role-based admin authorization enforced server-side. | Add authenticated admin identity, role mapping, permission checks, and actor binding for all privileged actions. | Critical | Review decisions and configuration changes are not defensible or auditable. |
+| Workflow and orchestration | Submission, invitation, and notification logic are mostly inline request behavior. | Explicit workflow state and asynchronous orchestration. | Introduce domain events and background processing for notifications, audit fan-out, and retryable workflow work. | High | Failures remain brittle, synchronous, and hard to recover. |
+| Relational system of record | Core tables and handlers exist, but lifecycle governance is incomplete. | Relational source of truth with controlled state transitions and history. | Add status transition history, stronger invariants, and versioned configuration handling for question sets and onboarding field definitions. | Medium | Traceability and change safety remain partial. |
+| File and evidence handling | Evidence upload logic exists, but production Vercel deployment has no complete storage integration; current codebase still reflects platform-coupled storage assumptions. | Secure evidence storage with upload authorization and download authorization. | Implement object storage integration, signed upload flow, metadata finalization, signed download or proxy retrieval, and download audit logging. | Critical | Declaration evidence cannot be handled securely end-to-end. |
+| Notifications | Invitation email behavior exists conceptually, but there is no production-grade notification subsystem behind the Vercel deployment. | Event-driven notification service with retries and delivery state. | Add notification provider abstraction, message templates, delivery persistence, retry handling, and operational visibility. | High | Invitation, assignment, and review communications are unreliable. |
+| Audit and observability | Current deployment has build visibility and the API boundary now has sanitized structured response events for operational failures when enabled. It still lacks durable portal-level audit, traces, metrics, dashboards, alerts, and domain event history. | First-class audit events plus logs, metrics, traces, and alerts. | Add immutable audit-event persistence, domain audit coverage, request tracing, metrics, dashboards, and alerts around auth, notification, storage, and workflow failures. | Critical | Production support, compliance review, and incident diagnosis remain insufficient beyond the API boundary. |
+| Deployment topology | Frontend is deployed from `frontend/`; `frontend/.env.example` now names the resource environment contract, but repository root still contains Retool metadata and backend source that Vercel is not serving. | Explicit deployable topology for frontend, backend, storage, and supporting services. | Document and implement the production topology explicitly: frontend on Vercel, backend execution location, database, storage, notification provider, and secrets model. | High | The repo structure and hosting shape remain easy to misread, causing partial deployments. |
+
+### What Is Not Missing
+
+The following are not the main blockers and should not be mistaken for the core architecture gap:
+
+- Static frontend hosting on Vercel
+- Vite production build capability
+- Presence of admin and client page surfaces in the repository
+- Presence of domain-oriented code artifacts in the repository
+
+### What Is Actually Missing
+
+The smallest true end-to-end gap set after Slice 01 is:
+
+1. Production resource adapters behind the deployed API boundary.
+2. Server-trusted identity and session management.
+3. Secure evidence storage and retrieval integration.
+4. Server-side authorization for admin and client actions.
+5. Notification, audit, and operational control planes.
+
+Without those five capabilities, the system remains a deployable frontend plus API shell rather than a full-stack portal.
+
+## Appendix C: Repository Workflow Coverage Evidence
+
+The target architecture and surgical gap analysis were derived from repository-discovered application surfaces, including:
 
 - Admin declaration listing and detail review flows.
 - Client invitation, acceptance, and login flows.
-- Client onboarding/profile completion flow.
+- Client onboarding and profile completion flow.
 - Question set and question management flows.
 - Client assignment retrieval and submission flows.
 - Self-service declaration submission with dynamic questions and evidence upload.
 
-This evidence was used to ensure the target architecture covers all currently expressed business workflows without inheriting implementation constraints as design decisions.
+These workflows are covered in the target-state flows above so the architecture remains complete without inheriting current platform limitations as design decisions.

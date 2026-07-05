@@ -6,8 +6,10 @@ Thumbs.db
 
 frontend/node_modules/
 frontend/dist/
+frontend/.vercel/
 frontend/playwright-report/
 frontend/test-results/
+frontend/.vercel-dev*.log
 
 .env
 .env.*

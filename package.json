@@ -1,5 +1,13 @@
 {
   "private": true,
+  "scripts": {
+    "build": "pnpm -C frontend build",
+    "dev": "pnpm -C frontend dev",
+    "preflight": "pnpm -C frontend run preflight",
+    "test:api": "pnpm -C frontend run test:api",
+    "test:e2e": "pnpm -C frontend run test:e2e",
+    "typecheck": "pnpm -C frontend run typecheck"
+  },
   "retool": {
     "app": {
       "uuid": "9b9579d0-7751-11f1-8a90-e7fb9d147d91",

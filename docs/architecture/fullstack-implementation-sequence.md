@@ -6,6 +6,8 @@ This document turns the selected skill bundles into an execution order for this 
 
 The objective is to close the highest-risk gaps first without over-engineering the initial delivery scope.
 
+For implementation planning, use the newer slice-based roadmap as the controlling artifact: [Client Declaration Portal Implementation Roadmap](C:/JackProject/afenda-bolt/Client-Declaration-Login/docs/roadmap/client-declaration-portal-roadmap.md). This file remains a coarse historical sequence and skill-bundle companion.
+
 ## Phase 1: Stabilize the Core Delivery Boundary
 
 ### Skills
@@ -125,7 +127,7 @@ This section is descriptive of the current codebase after the latest MVP stabili
 
 - Status: `Partial`
 - Done:
-  - frontend runtime supports standalone `/api/...` invocation in addition to Retool query execution
+  - frontend runtime supports standalone `/api/...` invocation and gates Retool or injected backend browser bridges outside development
   - client-facing flows now use a more coherent auth/session boundary instead of passing browser-owned identity into mutations
   - shared validation helpers were introduced for critical auth and submission entry points
 - Still open:

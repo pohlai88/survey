@@ -10,10 +10,12 @@
 
 ## Build, Test, and Development Commands
 
-- `pnpm -C frontend dev` runs the Vite dev server for the standalone frontend.
-- `node frontend/node_modules/typescript/bin/tsc --noEmit -p frontend/tsconfig.json` runs TypeScript validation.
-- `node frontend/node_modules/vite/bin/vite.js build --config frontend/vite.config.ts` builds the frontend for production.
-- `pnpm -C frontend build` should work in a normal environment, but this workspace may block `pnpm` on ignored build-script approval.
+- `pnpm run preflight` runs the required gate: API checks, typecheck, production build, and Playwright E2E.
+- `pnpm run dev` starts the Vite dev server for the standalone frontend.
+- `pnpm run typecheck` runs TypeScript validation.
+- `pnpm run build` builds the frontend for production.
+- `pnpm run test:api` verifies API boundary behavior, contracts, resource usage, and runtime bridge gating.
+- `pnpm run test:e2e` runs Playwright portal smoke workflows.
 
 ## Coding Style & Naming Conventions
 
@@ -25,13 +27,13 @@
 
 ## Testing Guidelines
 
-- No test suite is currently checked in; minimum validation is successful typecheck and production build.
-- When adding tests, place frontend tests beside the feature or under `frontend/__tests__/`.
-- Use descriptive names such as `returns error when assignment is not pending`.
+- API verification scripts live in `frontend/scripts/` and are wired through `pnpm run test:api`.
+- Playwright E2E tests live in `frontend/e2e/`; keep workflow tests named by user-visible behavior.
+- Run `pnpm run preflight` before handing off changes.
 
 ## Commit & Pull Request Guidelines
 
-- This workspace does not include Git metadata, so follow conventional, imperative commit messages: `fix auth password hashing`, `add question-set selector`.
+- No strict project-specific commit convention is enforced; use conventional, imperative messages such as `fix auth password hashing` or `add question-set selector`.
 - Keep commits focused by subsystem.
 - PRs should include: summary, affected flows, validation performed, screenshots for UI changes, and any architecture gaps left open.
 
